@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { submitContact } from '../config/apiService';
+import { usePortfolioContext } from '../context/PortfolioContext';
 
 const Contact = () => {
   const [ref, inView] = useInView({
@@ -15,19 +17,30 @@ const Contact = () => {
   });
   
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const { apiUrl } = usePortfolioContext();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you would send the form data to your backend
-    console.log('Form submitted:', formData);
-    setSubmitted(true);
-    setFormData({ name: '', email: '', message: '' });
-    setTimeout(() => setSubmitted(false), 3000);
+    setError('');
+    
+    try {
+      const result = await submitContact(apiUrl, formData);
+      if (result.success) {
+        setSubmitted(true);
+        setFormData({ name: '', email: '', message: '' });
+        setTimeout(() => setSubmitted(false), 3000);
+      } else {
+        setError(result.message || 'Failed to send message');
+      }
+    } catch (err) {
+      setError('Failed to send message. Please try again later.');
+    }
   };
 
   return (
@@ -40,6 +53,13 @@ const Contact = () => {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl font-bold mb-12 text-center">Contact Me</h2>
+          
+          {error && (
+            <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
+              {error}
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
               <h3 className="text-xl font-semibold mb-4">Get in Touch</h3>
@@ -93,7 +113,7 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Your name"
                     />
                   </div>
@@ -106,7 +126,7 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="your.email@example.com"
                     />
                   </div>
@@ -119,7 +139,7 @@ const Contact = () => {
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Your message here..."
                     ></textarea>
                   </div>

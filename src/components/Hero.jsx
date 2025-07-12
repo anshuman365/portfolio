@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { usePortfolioContext } from '../context/PortfolioContext';
 
 const Hero = () => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
   });
+  
+  const { portfolioData, apiUrl } = usePortfolioContext();
 
   return (
     <section id="hero" className="min-h-screen flex items-center pt-16">
@@ -19,10 +22,10 @@ const Hero = () => {
             transition={{ duration: 0.7 }}
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              Hi, I'm <span className="text-indigo-600">Anshuman Singh</span>
+              Hi, I'm <span className="text-indigo-600">{portfolioData?.name}</span>
             </h1>
             <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-gray-700 dark:text-gray-300">
-              Python Backend Developer & Aspiring Software Engineer
+              {portfolioData?.title}
             </h2>
             <p className="text-lg mb-8 max-w-lg">
               I build robust backend systems and automation tools. Currently, I'm a JEE aspirant planning to pursue BCA/BTech in Computer Science.
@@ -54,7 +57,15 @@ const Hero = () => {
           >
             <div className="relative">
               <div className="bg-indigo-600 rounded-full w-64 h-64 md:w-80 md:h-80 overflow-hidden shadow-xl">
-                <div className="bg-gray-200 border-2 border-dashed rounded-full w-full h-full" />
+                {portfolioData?.profile_image ? (
+                  <img 
+                    src={`${apiUrl}/uploads/${portfolioData.profile_image}`} 
+                    alt={portfolioData.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="bg-gray-200 border-2 border-dashed rounded-full w-full h-full" />
+                )}
               </div>
               <motion.div 
                 initial={{ scale: 0 }}
